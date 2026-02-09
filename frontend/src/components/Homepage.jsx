@@ -16,6 +16,7 @@ import {
   Wallet,
 } from "lucide-react";
 import "./Homepage.css";
+import Navbar from '../components/Navbar';
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -73,32 +74,7 @@ const Homepage = () => {
 
   return (
     <div className="ww-page">
-      <header className="ww-header">
-        <div className="ww-container ww-nav">
-          <button className="ww-logo" onClick={() => smoothScroll("top")}>
-            <span className="ww-logo-icon">
-              <Wallet size={24} />
-            </span>
-            WalletWise
-          </button>
-          <nav className={`ww-nav-links ${isMenuOpen ? "is-open" : ""}`}>
-            <button onClick={() => smoothScroll("about")}>About</button>
-            <button onClick={() => smoothScroll("features")}>Features</button>
-            <button className="ww-btn ww-btn-primary text-zinc-950 bg-black" onClick={() => navigate("/signup")}>
-              Get Started
-            </button>
-          </nav>
-          <button
-            className="ww-menu-toggle"
-            onClick={() => setIsMenuOpen((prev) => !prev)}
-            aria-label="Toggle navigation"
-            type="button"
-          >
-            <span />
-            <span />
-          </button>
-        </div>
-      </header>
+      <Navbar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} smoothScroll={smoothScroll} navigate={navigate} />
 
       <main id="top">
         <section className="ww-hero">
