@@ -62,8 +62,8 @@ const getDashboardSummary = async (req, res) => {
             Math.min((monthlyExpenses / monthlyBudget) * 100, 100) : 0;
         const budgetLeft = Math.max(0, monthlyBudget - monthlyExpenses);
 
-        // Calculate total balance
-        const totalBalance = monthlyIncome - monthlyExpenses + totalSavings;
+        // Calculate total balance - use User.walletBalance as the source of truth
+        const totalBalance = user.walletBalance;
 
         // Category spending (current month)
         const categoryMap = new Map();

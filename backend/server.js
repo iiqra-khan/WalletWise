@@ -111,6 +111,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 // ==================== HEALTH CHECK ====================
+
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'healthy',

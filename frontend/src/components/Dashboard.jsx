@@ -15,7 +15,7 @@ import {
   FaBrain, FaArrowUp, FaArrowDown, FaCalendarAlt,
   FaSync, FaExclamationCircle, FaHome, FaExchangeAlt,
   FaCog, FaChartPie, FaCreditCard, FaFileAlt, FaBell,
-  FaFilter, FaSearch
+  FaFilter, FaSearch, FaEdit, FaTrash
 } from 'react-icons/fa';
 import { Line, Pie, Bar } from 'react-chartjs-2';
 import { toast } from 'react-hot-toast';
@@ -101,6 +101,7 @@ const Dashboard = () => {
   const [categorySpending, setCategorySpending] = useState([]);
   const [weeklyExpenses, setWeeklyExpenses] = useState([]);
   const [savingsGoals, setSavingsGoals] = useState([]);
+  const [transactionToEdit, setTransactionToEdit] = useState(null);
 
   // Navigation items with proper routes
   const navItems = [
@@ -236,31 +237,50 @@ const Dashboard = () => {
     return false;
   };
 
-  const handleAddExpense = async (expenseData) => {
+  // Modified to handle BOTH Adding and Editing
+  const handleAddExpense = async (transactionData) => {
     try {
-      console.log('??? Adding expense:', expenseData);
+      let response;
 
-      const response = await api.post('/api/transactions', expenseData);
-
-      console.log('✅ Expense response:', response.data);
+      // LOGIC: If it has an ID, it is an EDIT (PUT). Otherwise, it is a NEW ADD (POST).
+      if (transactionData._id) {
+        console.log('✏️ Updating transaction:', transactionData);
+        response = await api.put(`/api/transactions/${transactionData._id}`, transactionData);
+        toast.success('Transaction updated successfully');
+      } else {
+        console.log('➕ Adding new expense:', transactionData);
+        response = await api.post('/api/transactions', transactionData);
+        toast.success('Expense added successfully');
+      }
 
       if (response.data.success) {
         setShowAddExpenseModal(false);
+        setTransactionToEdit(null); // Clear the edit state
         await fetchDashboardData();
-        toast.success('Expenses added succesfullly.', {
-          style: {
-            background: '#16a34a',
-            color: '#ffffff'
-          },
-          iconTheme: {
-            primary: '#bbf7d0',
-            secondary: '#166534'
-          }
-        });
       }
     } catch (err) {
-      console.error('❌ Failed to add expense:', err);
-      alert('Failed to add expense. Please try again.');
+      console.error('❌ Failed to save transaction:', err);
+      toast.error(err.response?.data?.message || 'Failed to save transaction');
+    }
+  };
+
+  // === NEW: Handle Edit Click ===
+  const handleEdit = (transaction) => {
+    setTransactionToEdit(transaction); // Load data into state
+    setShowAddExpenseModal(true);      // Open the modal
+  };
+
+  // === NEW: Handle Delete Click ===
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this transaction?')) {
+      try {
+        await api.delete(`/api/transactions/${id}`);
+        toast.success('Transaction deleted successfully');
+        await fetchDashboardData(); // Refresh list
+      } catch (err) {
+        console.error('Error deleting transaction:', err);
+        toast.error('Failed to delete transaction');
+      }
     }
   };
 
@@ -843,6 +863,23 @@ const Dashboard = () => {
                     {transaction.type === 'expense' ? '-' : '+'}
                     {formatCurrency(transaction.amount)}
                   </div>
+                  {/* === NEW: Action Buttons === */}
+                  <div className="transaction-actions" style={{ display: 'flex', gap: '10px', marginLeft: '15px' }}>
+                    <button
+                      onClick={() => handleEdit(transaction)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3b82f6' }}
+                      title="Edit"
+                    >
+                      <FaEdit size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(transaction._id || transaction.id)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}
+                      title="Delete"
+                    >
+                      <FaTrash size={16} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -904,8 +941,12 @@ const Dashboard = () => {
       {/* MODALS */}
       <AddExpense
         isOpen={showAddExpenseModal}
-        onClose={() => setShowAddExpenseModal(false)}
+        onClose={() => {
+          setShowAddExpenseModal(false);
+          setTransactionToEdit(null); // Critical: Clear data when closing
+        }}
         onAddExpense={handleAddExpense}
+        transactionToEdit={transactionToEdit} // <--- Pass the data here
       />
 
       <AddIncome
