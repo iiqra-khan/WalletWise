@@ -99,7 +99,7 @@ const userRegisterSchema = z.object({
   studentId: z.string().min(1, 'Student ID is required').max(50),
   fullName: z.string().min(2, 'Full name is required').max(100),
   email: z.string().email('Invalid email format'),
-  password: z.string().min(8, 'Password must be at least 8 characters').max(128),
+  password: z.string().min(6, 'Password must be at least 6 characters').max(128),
   department: z.string().max(100).optional(),
   year: z.string().max(20).optional()
 });
@@ -111,8 +111,18 @@ const userLoginSchema = z.object({
 
 const userUpdateSchema = z.object({
   fullName: z.string().min(2).max(100).optional(),
+  phoneNumber: z.string().optional(),
   department: z.string().max(100).optional(),
-  year: z.string().max(20).optional()
+  year: z.string().max(20).optional(),
+  // Profile Settings
+  currency: z.string().optional(),
+  dateFormat: z.string().optional(),
+  language: z.string().optional(),
+  // Financial Settings
+  incomeFrequency: z.string().optional(),
+  incomeSources: z.string().optional(),
+  priorities: z.string().optional(),
+  riskTolerance: z.string().optional()
 });
 
 const verifyEmailSchema = z.object({

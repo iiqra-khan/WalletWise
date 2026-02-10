@@ -9,10 +9,13 @@ const Profile = () => {
     const lastUserIdRef = useRef(null);
     const [status, setStatus] = useState({ type: '', message: '' });
     const [isSaving, setIsSaving] = useState(false);
+    const [file, setFile] = useState(null);
+    const fileInputRef = useRef(null);
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
         phoneNumber: '',
+        avatar: '',
         department: '',
         year: '1st',
         currency: 'USD',
@@ -31,8 +34,12 @@ const Profile = () => {
             fullName: user.fullName || '',
             email: user.email || '',
             phoneNumber: user.phoneNumber || '',
+            avatar: user.avatar || '',
             department: user.department || '',
-            year: user.year || '1st'
+            year: user.year || '1st',
+            currency: user.currency || 'USD',
+            dateFormat: user.dateFormat || 'MM/DD/YYYY',
+            language: user.language || 'English'
         }));
         lastUserIdRef.current = user._id;
     }, [user]);
@@ -42,16 +49,38 @@ const Profile = () => {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0];
+        if (selectedFile) {
+            setFile(selectedFile);
+            // Create preview URL
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData(prev => ({ ...prev, avatar: reader.result }));
+            };
+            reader.readAsDataURL(selectedFile);
+        }
+    };
+
+    const handleAvatarClick = () => {
+        fileInputRef.current.click();
+    };
+
     const handleReset = () => {
         if (!user) return;
         setStatus({ type: '', message: '' });
+        setFile(null);
         setFormData((prev) => ({
             ...prev,
             fullName: user.fullName || '',
             email: user.email || '',
             phoneNumber: user.phoneNumber || '',
+            avatar: user.avatar || '',
             department: user.department || '',
-            year: user.year || '1st'
+            year: user.year || '1st',
+            currency: user.currency || 'USD',
+            dateFormat: user.dateFormat || 'MM/DD/YYYY',
+            language: user.language || 'English'
         }));
     };
 
@@ -61,23 +90,35 @@ const Profile = () => {
         setIsSaving(true);
         setStatus({ type: '', message: '' });
         try {
-            const payload = {
-                fullName: formData.fullName,
-                phoneNumber: formData.phoneNumber,
-                department: formData.department,
-                year: formData.year
-            };
-            const data = await updateProfile(payload);
+            const formDataToSend = new FormData();
+            formDataToSend.append('fullName', formData.fullName);
+            formDataToSend.append('phoneNumber', formData.phoneNumber);
+            formDataToSend.append('department', formData.department);
+            formDataToSend.append('year', formData.year);
+            formDataToSend.append('currency', formData.currency);
+            formDataToSend.append('dateFormat', formData.dateFormat);
+            formDataToSend.append('language', formData.language);
+
+            if (file) {
+                formDataToSend.append('file', file);
+            }
+
+            const data = await updateProfile(formDataToSend);
             if (data?.success) {
                 setFormData((prev) => ({
                     ...prev,
                     fullName: data.user?.fullName || '',
                     email: data.user?.email || '',
                     phoneNumber: data.user?.phoneNumber || '',
+                    avatar: data.user?.avatar || '',
                     department: data.user?.department || '',
-                    year: data.user?.year || '1st'
+                    year: data.user?.year || '1st',
+                    currency: data.user?.currency || 'USD',
+                    dateFormat: data.user?.dateFormat || 'MM/DD/YYYY',
+                    language: data.user?.language || 'English'
                 }));
                 setStatus({ type: 'success', message: 'Profile updated successfully.' });
+                setFile(null);
             } else {
                 setStatus({ type: 'error', message: data?.message || 'Unable to save changes.' });
             }
@@ -119,8 +160,27 @@ const Profile = () => {
                 </div>
                 <div className="profile-card">
                     <div className="avatar-block">
-                        <div className="avatar-circle">{userInitials}</div>
-                        <button className="btn-secondary">Change Avatar</button>
+                        <div className="avatar-circle">
+                            {formData.avatar ? (
+                                <img
+                                    src={formData.avatar}
+                                    alt="Profile"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                            ) : (
+                                userInitials
+                            )}
+                        </div>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            style={{ display: 'none' }}
+                        />
+                        <button className="btn-secondary" onClick={handleAvatarClick} type="button">
+                            Change Avatar
+                        </button>
                     </div>
                     <div className="profile-form">
                         <label>

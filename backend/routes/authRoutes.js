@@ -2,14 +2,16 @@
 const rateLimit = require('express-rate-limit');
 const { protect } = require('../middleware/auth');
 const validate = require('../middleware/validate');
-const { 
-  userRegisterSchema, 
-  userLoginSchema, 
+const {
+  userRegisterSchema,
+  userLoginSchema,
   userUpdateSchema,
   verifyEmailSchema,
-  resendOtpSchema 
+  resendOtpSchema
 } = require('../utils/validationSchemas');
 const authController = require('../controllers/authController');
+
+const singleUpload = require('../middleware/multer');
 
 const router = express.Router();
 
@@ -26,6 +28,6 @@ router.post('/resend-otp', authLimiter, validate(resendOtpSchema), authControlle
 router.post('/logout', authController.logout);
 router.post('/refresh', authController.refresh);
 router.get('/me', protect, authController.me);
-router.put('/profile', protect, validate(userUpdateSchema), authController.updateProfile);
+router.put('/profile', protect, singleUpload, validate(userUpdateSchema), authController.updateProfile);
 
 module.exports = router;
