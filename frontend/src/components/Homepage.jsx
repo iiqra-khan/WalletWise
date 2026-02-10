@@ -481,13 +481,5 @@ const Homepage = () => {
     </div>
   );
 };
-<p className="copy-year">© 2026 WalletWise.</p></div >
-          </div >
-        </div >
-      </footer >
-    </div >
-  );
-};
 
-export default Homepage;
 export default Homepage;
