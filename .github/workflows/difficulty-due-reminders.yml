@@ -21,5 +21,3 @@ jobs:
           script: |
             const fn = require('./.github/scripts/difficultyReminder.js');
             await fn({ github, context });
-
-
