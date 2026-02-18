@@ -4,6 +4,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
 const passport = require("passport");
+const helmet = require("helmet");
 const { configurePassport } = require("./config/passport");
 const authRoutes = require("./routes/authRoutes");
 const oauthRoutes = require("./routes/oauthRoutes");
@@ -13,6 +14,9 @@ dotenv.config();
 
 // Initialize Express app
 const app = express();
+
+// Enable trust proxy for correct rate limiting behind load balancers (Vercel, Heroku, AWS ELB)
+app.set('trust proxy', 1);
 
 // ==================== SECURITY HEADERS ====================
 app.use(helmet());
@@ -39,9 +43,15 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Body parsers with stricter limits to prevent memory exhaustion
+// Body parsers
 app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+// Disable extended urlencoded to prevent naive form attacks, though the middleware below is the real fix
+app.use(express.urlencoded({ extended: false, limit: '1mb' }));
+
+// ==================== SECURITY MIDDLEWARE ====================
+const { enforceJsonContent } = require('./middleware/security');
+// Apply strict content-type enforcement to ALL API routes
+app.use('/api', enforceJsonContent);
 
 // Cookie parser
 app.use(cookieParser());
@@ -122,8 +132,7 @@ mongoose.connect(MONGODB_URI, {
     });
 
 // ==================== ROUTE IMPORTS ====================
-const authRoutes = require('./routes/authRoutes');
-const oauthRoutes = require('./routes/oauthRoutes');
+// const authRoutes = require('./routes/authRoutes');
 const budgetRoutes = require('./routes/budgetRoutes');
 const savingGoalRoutes = require('./routes/savingGoalRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
