@@ -26,6 +26,8 @@ import Signup from './components/Signup';
 import VerifyEmail from './components/VerifyEmail';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
+import ForgotPassword from './components/ForgotPassword';
+
 
 function App() {
   return (
@@ -86,6 +88,15 @@ function App() {
                 element={
                   <PublicRoute>
                     <VerifyEmail />
+                  </PublicRoute>
+                }
+              />
+
+              <Route
+                path="/forgot-password"
+                element={
+                  <PublicRoute>
+                    <ForgotPassword />
                   </PublicRoute>
                 }
               />
