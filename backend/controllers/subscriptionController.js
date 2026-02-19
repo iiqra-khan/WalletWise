@@ -1,6 +1,7 @@
 
 const Subscription = require('../models/Subscription');
 const Transaction = require('../models/Transactions');
+const { isValidObjectId } = require('../utils/validation');
 
 // Get all active subscriptions
 const getSubscriptions = async (req, res) => {
@@ -40,6 +41,11 @@ const addSubscription = async (req, res) => {
 const deleteSubscription = async (req, res) => {
     try {
         const { id } = req.params;
+
+        if (!isValidObjectId(id)) {
+            return res.status(400).json({ success: false, message: 'Invalid subscription ID format' });
+        }
+
         const subscription = await Subscription.findOneAndUpdate(
             { _id: id, userId: req.userId },
             { isActive: false },

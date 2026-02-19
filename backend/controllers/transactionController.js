@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Transaction = require('../models/Transactions');
 const User = require('../models/User');
+const { isValidObjectId } = require('../utils/validation');
 
 // Helper to handle transaction cleanup
 const withTransaction = async (operation) => {
@@ -192,6 +193,10 @@ const updateTransaction = async (req, res) => {
         const userId = req.userId;
         const { type, amount, category, description, paymentMethod, mood, date } = req.body;
 
+        if (!isValidObjectId(id)) {
+            return res.status(400).json({ success: false, message: 'Invalid transaction ID format' });
+        }
+
         await withTransaction(async (session) => {
             const oldTransaction = await Transaction.findOne({ _id: id, userId }).session(session);
             if (!oldTransaction) {
@@ -271,6 +276,10 @@ const deleteTransaction = async (req, res) => {
     try {
         const { id } = req.params;
         const userId = req.userId;
+
+        if (!isValidObjectId(id)) {
+            return res.status(400).json({ success: false, message: 'Invalid transaction ID format' });
+        }
 
         await withTransaction(async (session) => {
             const transaction = await Transaction.findOneAndDelete({ _id: id, userId }).session(session);

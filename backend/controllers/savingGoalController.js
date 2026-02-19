@@ -1,4 +1,5 @@
 const SavingsGoal = require('../models/SavingGoal');
+const { isValidObjectId } = require('../utils/validation');
 
 // Create Savings Goal
 const createGoal = async (req, res) => {
@@ -111,6 +112,11 @@ const getAllGoals = async (req, res) => {
 const addAmount = async (req, res) => {
     try {
         const goalId = req.params.id;
+
+        if (!isValidObjectId(goalId)) {
+            return res.status(400).json({ success: false, message: 'Invalid goal ID format' });
+        }
+
         const amount = parseFloat(req.body?.amount);
 
         if (!amount || isNaN(amount) || amount <= 0) {
