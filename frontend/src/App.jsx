@@ -19,6 +19,7 @@ import Reports from './pages/Reports';
 import SubscriptionDashboard from './pages/SubscriptionDashboard';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
+import DecisionHelper from './pages/DecisionHelper';
 
 // Import authentication components
 import Login from './components/Login';
@@ -237,6 +238,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Profile />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/decision-helper"
+                element={
+                  <ProtectedRoute>
+                    <DecisionHelper />
                   </ProtectedRoute>
                 }
               />
