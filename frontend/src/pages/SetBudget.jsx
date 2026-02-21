@@ -1,42 +1,36 @@
-// src/pages/SetBudget.jsx
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import api from '../api/client';
 import './SetBudget.css';
 import ConfirmDialog from "../components/ConfirmDialog";
 
+const DEFAULT_CATEGORIES = [
+  { name: 'Food', categoryType: 'food', amount: 0, percentage: 0, color: '#FF6B6B' },
+  { name: 'Transport', categoryType: 'transport', amount: 0, percentage: 0, color: '#4ECDC4' },
+  { name: 'Shopping', categoryType: 'shopping', amount: 0, percentage: 0, color: '#06D6A0' },
+  { name: 'Entertainment', categoryType: 'entertainment', amount: 0, percentage: 0, color: '#FFD166' },
+  { name: 'Education', categoryType: 'education', amount: 0, percentage: 0, color: '#118AB2' },
+  { name: 'Healthcare', categoryType: 'healthcare', amount: 0, percentage: 0, color: '#EF4444' },
+  { name: 'Housing', categoryType: 'housing', amount: 0, percentage: 0, color: '#8B5CF6' },
+  { name: 'Other', categoryType: 'other', amount: 0, percentage: 0, color: '#7209B7' }
+];
+
 const SetBudget = ({ isOpen, onClose, onSetBudget }) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [formData, setFormData] = useState({
     totalBudget: '',
-    categories: [
-      { name: 'Food', amount: 0, percentage: 0, color: '#FF6B6B' },
-      { name: 'Transport', amount: 0, percentage: 0, color: '#4ECDC4' },
-      { name: 'Entertainment', amount: 0, percentage: 0, color: '#FFD166' },
-      { name: 'Shopping', amount: 0, percentage: 0, color: '#06D6A0' },
-      { name: 'Education', amount: 0, percentage: 0, color: '#118AB2' },
-      { name: 'Other', amount: 0, percentage: 0, color: '#7209B7' }
-    ]
+    categories: DEFAULT_CATEGORIES
   });
 
   const [activeCategory, setActiveCategory] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Load current budget when modal opens
   useEffect(() => {
     if (isOpen) {
-      // Reset form when opening
       setFormData({
         totalBudget: '',
-        categories: [
-          { name: 'Food', amount: 0, percentage: 0, color: '#FF6B6B' },
-          { name: 'Transport', amount: 0, percentage: 0, color: '#4ECDC4' },
-          { name: 'Entertainment', amount: 0, percentage: 0, color: '#FFD166' },
-          { name: 'Shopping', amount: 0, percentage: 0, color: '#06D6A0' },
-          { name: 'Education', amount: 0, percentage: 0, color: '#118AB2' },
-          { name: 'Other', amount: 0, percentage: 0, color: '#7209B7' }
-        ]
+        categories: DEFAULT_CATEGORIES
       });
       setActiveCategory(0);
       setError('');
@@ -47,12 +41,14 @@ const SetBudget = ({ isOpen, onClose, onSetBudget }) => {
   useEffect(() => {
     const total = Number(formData.totalBudget) || 0;
     if (total > 0) {
-      const updatedCategories = formData.categories.map(cat => ({
-        ...cat,
-        amount: Math.round((cat.percentage / 100) * total),
-        amountStr: Math.round((cat.percentage / 100) * total).toString()
+      setFormData(prev => ({
+        ...prev,
+        categories: prev.categories.map(cat => ({
+          ...cat,
+          amount: Math.round((cat.percentage / 100) * total),
+          amountStr: Math.round((cat.percentage / 100) * total).toString()
+        }))
       }));
-      setFormData(prev => ({ ...prev, categories: updatedCategories }));
     }
   }, [formData.totalBudget]);
 
@@ -131,9 +127,9 @@ const SetBudget = ({ isOpen, onClose, onSetBudget }) => {
 
   const handleQuickAllocation = (type) => {
     const allocations = {
-      'student': [30, 20, 15, 10, 15, 10],
-      'balanced': [25, 15, 10, 15, 20, 15],
-      'saver': [40, 25, 5, 5, 20, 5]
+      'student': [25, 15, 10, 10, 15, 5, 10, 10],
+      'balanced': [20, 15, 10, 10, 15, 10, 10, 10],
+      'saver': [30, 20, 5, 5, 15, 5, 15, 5]
     };
 
     const percentages = allocations[type] || allocations['balanced'];
@@ -172,6 +168,7 @@ const SetBudget = ({ isOpen, onClose, onSetBudget }) => {
       const amount = Math.round((percentage / 100) * totalBudget);
       return {
         name: cat.name,
+        categoryType: cat.categoryType,
         amount,
         percentage,
         color: cat.color
@@ -244,14 +241,7 @@ const SetBudget = ({ isOpen, onClose, onSetBudget }) => {
   const resetForm = () => {
     setFormData({
       totalBudget: '',
-      categories: [
-        { name: 'Food', amount: 0, percentage: 0, color: '#FF6B6B' },
-        { name: 'Transport', amount: 0, percentage: 0, color: '#4ECDC4' },
-        { name: 'Entertainment', amount: 0, percentage: 0, color: '#FFD166' },
-        { name: 'Shopping', amount: 0, percentage: 0, color: '#06D6A0' },
-        { name: 'Education', amount: 0, percentage: 0, color: '#118AB2' },
-        { name: 'Other', amount: 0, percentage: 0, color: '#7209B7' }
-      ]
+      categories: DEFAULT_CATEGORIES
     });
     setActiveCategory(0);
     setError('');

@@ -1,5 +1,6 @@
 // models/Transaction.js
 const mongoose = require('mongoose');
+const { CATEGORIES } = require('../constants/categories');
 
 const transactionSchema = new mongoose.Schema({
   userId: {
@@ -19,7 +20,7 @@ const transactionSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['food', 'transport', 'shopping', 'entertainment', 'education', 'healthcare', 'housing', 'other'],
+    enum: CATEGORIES,
     required: true
   },
   description: {
@@ -35,11 +36,30 @@ const transactionSchema = new mongoose.Schema({
     enum: ['cash', 'card', 'upi', 'online'],
     default: 'cash'
   },
+  isRecurring: {
+  type: Boolean,
+  default: false
+},
+recurringInterval: {
+  type: String,
+  enum: ["daily", "weekly", "monthly", null],
+  default: null
+},
+nextExecutionDate: {
+  type: Date,
+  default: null
+},
+
   mood: {
     type: String,
     enum: ['happy', 'stressed', 'bored', 'sad', 'calm', 'neutral'],
     default: 'neutral'
   }
 }, { timestamps: true });
+
+// Indexes for analytics performance
+transactionSchema.index({ userId: 1, type: 1, date: -1 });
+transactionSchema.index({ userId: 1, category: 1 });
+transactionSchema.index({ userId: 1, description: 1 });
 
 module.exports = mongoose.model('Transaction', transactionSchema);
